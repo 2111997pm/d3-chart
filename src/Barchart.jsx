@@ -23,7 +23,7 @@ const BarChart = ({ data, width, height }) => {
             .nice()
             .range([height, 0]);
 
-        // Draw bars
+        // Draw bars with labels and animations
         svg
             .selectAll('rect')
             .data(data)
@@ -33,18 +33,32 @@ const BarChart = ({ data, width, height }) => {
             .attr('y', d => yScale(d))
             .attr('width', xScale.bandwidth())
             .attr('height', d => height - yScale(d))
-            .attr('fill', 'steelblue');
+            .attr('fill', 'steelblue')
+            .attr('opacity', 0) // Set initial opacity to 0 for animation
+            .transition()
+            .duration(1000) // Animation duration in milliseconds
+            .attr('opacity', 1); // Transition to full opacity
+
+        // Add labels to the bars
+        svg
+            .selectAll('.bar-label')
+            .data(data)
+            .enter()
+            .append('text')
+            .attr('class', 'bar-label')
+            .attr('x', (d, i) => xScale(i) + xScale.bandwidth() / 2)
+            .attr('y', d => yScale(d) - 5) // Adjust position for label
+            .attr('text-anchor', 'middle')
+            .text(d => d);
 
         // Draw x-axis
         svg
             .append('g')
             .attr('transform', `translate(0,${height})`)
-            .call(d3.axisBottom(xScale))
-            
+            .call(d3.axisBottom(xScale));
 
         // Draw y-axis
         svg.append('g').call(d3.axisLeft(yScale));
-        
     }, [data, width, height]);
 
     return <svg ref={svgRef} width={width} height={height}></svg>;
