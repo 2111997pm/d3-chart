@@ -3,10 +3,19 @@ import BarChart from './Barchart'
 
 const App = () => {
 
-  const data = [10, 20, 30, 40, 50,100,100,40];
+  const data = [
+    { month: 'January', sales: 100 },
+    { month: 'February', sales: 150 },
+    { month: 'March', sales: 200 },
+    { month: 'April', sales: 175 },
+    { month: 'May', sales: 120 },
+  ];
   return (
     <>
-      <BarChart data={data} width={400} height={300}/>
+      <div className="App">
+        <h1>Bar Chart Example with D3.js</h1>
+        <BarChart data={data} />
+      </div>
     </>
   )
 }

@@ -1,67 +1,72 @@
 import React, { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 
-const BarChart = ({ data, width, height }) => {
-    const svgRef = useRef();
+const BarChart = ({ data }) => {
+  const svgRef = useRef();
 
-    useEffect(() => {
-        const svg = d3.select(svgRef.current);
+  useEffect(() => {
+    const svg = d3.select(svgRef.current);
+    const width = 600;
+    const height = 400;
+    const margin = { top: 20, right: 30, bottom: 40, left: 40 };
+    const chartWidth = width - margin.left - margin.right;
+    const chartHeight = height - margin.top - margin.bottom;
 
-        // Clear existing chart
-        svg.selectAll('*').remove();
+    svg.attr('width', width).attr('height', height);
 
-        // Create scales
-        const xScale = d3
-            .scaleBand()
-            .domain(data.map((d, i) => i))
-            .range([0, width])
-            .padding(0.1);
+    const xScale = d3
+      .scaleBand()
+      .domain(data.map((d) => d.month))
+      .range([margin.left, width - margin.right])
+      .padding(0.1);
 
-        const yScale = d3
-            .scaleLinear()
-            .domain([0, d3.max(data, d => d)])
-            .nice()
-            .range([height, 0]);
+    const yScale = d3
+      .scaleLinear()
+      .domain([0, d3.max(data, (d) => d.sales)])
+      .nice()
+      .range([height - margin.bottom, margin.top]);
 
-        // Draw bars with labels and animations
-        svg
-            .selectAll('rect')
-            .data(data)
-            .enter()
-            .append('rect')
-            .attr('x', (d, i) => xScale(i))
-            .attr('y', d => yScale(d))
-            .attr('width', xScale.bandwidth())
-            .attr('height', d => height - yScale(d))
-            .attr('fill', 'steelblue')
-            .attr('opacity', 0) // Set initial opacity to 0 for animation
-            .transition()
-            .duration(1000) // Animation duration in milliseconds
-            .attr('opacity', 1); // Transition to full opacity
+    const xAxis = (g) =>
+      g
+        .attr('transform', `translate(0,${height - margin.bottom})`)
+        .call(d3.axisBottom(xScale).tickSizeOuter(0));
 
-        // Add labels to the bars
-        svg
-            .selectAll('.bar-label')
-            .data(data)
-            .enter()
+    const yAxis = (g) =>
+      g
+        .attr('transform', `translate(${margin.left},0)`)
+        .call(d3.axisLeft(yScale).ticks(null, 's'))
+        .call((g) => g.select('.domain').remove())
+        .call((g) =>
+          g
             .append('text')
-            .attr('class', 'bar-label')
-            .attr('x', (d, i) => xScale(i) + xScale.bandwidth() / 2)
-            .attr('y', d => yScale(d) - 5) // Adjust position for label
-            .attr('text-anchor', 'middle')
-            .text(d => d);
+            .attr('x', -margin.left)
+            .attr('y', 10)
+            .attr('fill', 'currentColor')
+            .attr('text-anchor', 'start')
+            .text('Sales')
+        );
 
-        // Draw x-axis
-        svg
-            .append('g')
-            .attr('transform', `translate(0,${height})`)
-            .call(d3.axisBottom(xScale));
+    svg.select('.x-axis').call(xAxis);
+    svg.select('.y-axis').call(yAxis);
 
-        // Draw y-axis
-        svg.append('g').call(d3.axisLeft(yScale));
-    }, [data, width, height]);
+    svg
+      .selectAll('.bar')
+      .data(data)
+      .join('rect')
+      .attr('class', 'bar')
+      .attr('x', (d) => xScale(d.month))
+      .attr('y', (d) => yScale(d.sales))
+      .attr('width', xScale.bandwidth())
+      .attr('height', (d) => chartHeight - yScale(d.sales))
+      .attr('fill', 'steelblue');
+  }, [data]);
 
-    return <svg ref={svgRef} width={width} height={height}></svg>;
+  return (
+    <svg ref={svgRef}>
+      <g className="x-axis" />
+      <g className="y-axis" />
+    </svg>
+  );
 };
 
 export default BarChart;
