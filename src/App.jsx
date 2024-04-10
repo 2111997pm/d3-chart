@@ -9,10 +9,13 @@ const App = () => {
     { month: 'March', sales: 200 },
     { month: 'April', sales: 175 },
     { month: 'May', sales: 120 },
+    { month: 'june', sales: 220 },
+    { month: 'july', sales: 120 },
   ];
+
   return (
     <>
-      <div className="App">
+      <div>
         <h1>Bar Chart Example with D3.js</h1>
         <BarChart data={data} />
       </div>
